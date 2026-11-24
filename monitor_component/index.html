@@ -1,0 +1,24 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>body{font:12px sans-serif;color:#666;margin:0}</style></head>
+<body><span id="status">Monitoring sesi aktif (tab/jendela browser)</span>
+<script>
+(function(){
+  let sent = 0;
+  function send(kind){
+    const now = Date.now();
+    if (now - sent < 1800) return;
+    sent = now;
+    const value = {event_id: String(now) + '-' + Math.random().toString(36).slice(2), event: kind};
+    window.parent.postMessage({isStreamlitMessage:true,type:'streamlit:setComponentValue',value:value}, '*');
+  }
+  function ready(){
+    window.parent.postMessage({isStreamlitMessage:true,type:'streamlit:componentReady',apiVersion:1}, '*');
+    window.parent.postMessage({isStreamlitMessage:true,type:'streamlit:setFrameHeight',height:24}, '*');
+  }
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') send('Tab browser tidak terlihat / berpindah tab');
+  });
+  window.addEventListener('blur', function(){ send('Jendela browser kehilangan fokus'); });
+  ready();
+})();
+</script></body></html>
